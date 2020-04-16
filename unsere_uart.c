@@ -5,30 +5,38 @@
 
 #include "unsere_uart.h"
 
+// Configuration for UART in order to write and read the serial data
 void uart_setup(void) {
+    rcc_periph_clock_enable(RCC_GPIOA);
+    gpio_set_mode(GPIOA,
+		GPIO_MODE_INPUT,
+		GPIO_CNF_INPUT_ANALOG,
+		GPIO0);
     rcc_periph_clock_enable(RCC_USART1);
 
     //  Enable UART TX (PA9)
+    // In order to use the pin A9 to transmit the information.
     gpio_set_mode(GPIOA,
                   GPIO_MODE_OUTPUT_50_MHZ,
                   GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,
                   GPIO_USART1_TX);
 
     //  Enable UART RX (PA10)
+    // In order to use the pin A10 to read the information.
     gpio_set_mode(GPIOA,
                   GPIO_MODE_INPUT,
                   GPIO_CNF_INPUT_PULL_UPDOWN,
                   GPIO_USART1_RX);
 
-    usart_set_baudrate(USART1, 9600);  //  Baudrate 9600
-    usart_set_databits(USART1, 8);
+    usart_set_baudrate(USART1, 9600);  //  Baudrate configurated at 9600
+    usart_set_databits(USART1, 8);  //  Data will be 8 bit long 
     usart_set_stopbits(USART1, USART_STOPBITS_1);
     usart_set_mode(USART1, USART_MODE_TX_RX);
     usart_set_parity(USART1, USART_PARITY_NONE);
     usart_set_flow_control(USART1, USART_FLOWCONTROL_NONE);
 
-    nvic_enable_irq(NVIC_USART1_IRQ);   //  Habilitador global de interrupcion
-    usart_enable_rx_interrupt(USART1);   //  Habilitador local de interrupcion
+    nvic_enable_irq(NVIC_USART1_IRQ);   //  Global enable of interruption
+    usart_enable_rx_interrupt(USART1);   //  Local enable of interruption
 
     usart_enable(USART1);
 }
