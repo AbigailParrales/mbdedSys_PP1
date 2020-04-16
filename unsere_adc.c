@@ -1,15 +1,44 @@
+
+/*********************************************************************
+* Copyright 2020 ITESM                                               *
+*                                                                    *
+*                                                                    *
+* ADC_UART                                                           *
+*                                                                    *
+* By                                                                 *
+* Jesús Enrique Luna Medina A01632334                                *
+* Daniela abigail Parrales Mejía A01228629                           *
+* Luis Cortés Leal A01631163                                         *
+*                                                                    *
+* Abril 2020                                                         *
+* The project titled ADC_UART is carried out with the purpose of     *
+* implementing a temperature sensing system which acquires the       *
+* values from the environment and delivers a response through        *
+* hardware using LEDs and software displaying on a Terminal.         *
+*                                                                    *
+*********************************************************************/
+
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/adc.h>
 
 #include "unsere_adc.h"
+
+/********************************************************************/
+
+/*********************************************************************
+* To configure the ADC peripheral                                    *
+* The clock from the peripheral is turned on                         *
+* And the power of the peipheral must be disabled                    *
+*                                                                    *
+*********************************************************************/
 
 void ADC_setup(void) {
     rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_ADC1EN);
     adc_power_off(ADC1);
     rcc_peripheral_reset(&RCC_APB2RSTR, RCC_APB2RSTR_ADC1RST);
     rcc_peripheral_clear_reset(&RCC_APB2RSTR, RCC_APB2RSTR_ADC1RST);
-    rcc_set_adcpre(RCC_CFGR_ADCPRE_PCLK2_DIV6);    //  Set. 12MHz, Max. 14MHz
-    adc_set_dual_mode(ADC_CR1_DUALMOD_IND);        //  Independent mode
+    rcc_set_adcpre(RCC_CFGR_ADCPRE_PCLK2_DIV6);    ///< Set. 12MHz, Max. 14MHz
+    adc_set_dual_mode(ADC_CR1_DUALMOD_IND);        ///<  Independent mode
     adc_disable_scan_mode(ADC1);
     adc_set_right_aligned(ADC1);
     adc_set_single_conversion_mode(ADC1);
@@ -18,6 +47,14 @@ void ADC_setup(void) {
     adc_calibrate_async(ADC1);
     while ( adc_is_calibrating(ADC1) ) {}
 }
+
+/*****************************************************************/
+
+/************************************************************************
+* To configure the sample time and it is sequence, specifying which     *
+* channels are used.                                                    *
+*                                                                       *
+************************************************************************/
 
 uint16_t read_adc(uint8_t channel) {
     adc_set_sample_time(ADC1, channel, ADC_SMPR_SMP_239DOT5CYC);
