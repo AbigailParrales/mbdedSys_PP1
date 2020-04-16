@@ -42,18 +42,19 @@
 
 /********************************************************************/
 
-char tmp[]=("Temp: ---C| Max: ---C| Min: ---C| TMPmax: ---| TMPmin: --- \r\n");
-char rxmsg[4] = "x";
-int16_t max = 150, min = 50;
-char maxTmp[]="150";
-char minTmp[]="050";
-int i = 0, j = 0, k = 0;
-int16_t aux_min_max = 0;
+char tmp[]=("Temp: ---C| Max: ---C| Min: ---C| TMPmax: ---| TMPmin: --- \r\n"); ///< Message display on terminal
+char rxmsg[4] = "x"; ///< Key pressed to configure superior limit
+char rxmsg[4] = "n"; ///< Key pressed to configure inferior limit
+int16_t max = 150, min = 50; ///< Initial conditions
+char maxTmp[]="150"; ///< The maximum limit of the system
+char minTmp[]="050"; ///< The minimum limit of the system
+int i = 0, j = 0, k = 0; ///< Global variables used along the code
+int16_t aux_min_max = 0; ///< Used for receive the letter entered from the keyboard
 
 /********************************************************************/
 
 int main(void) {
-    rcc_clock_setup_in_hse_8mhz_out_72mhz(); ///  Use this for "blue pill"
+    rcc_clock_setup_in_hse_8mhz_out_72mhz(); ///< Use this for "blue pill"
     gpio_setup();
     ADC_setup();
     uart_setup();
@@ -74,7 +75,7 @@ int main(void) {
 */
 
 void usart1_isr(void) {
-    USART1_SR = ~(1<<5);  //  borrar bandera
+    USART1_SR = ~(1<<5);  ///< Erase flag
     char flag_set_min_max = 0;
 
 /** When the 'n' is pressed, the configuration to set the miminum
@@ -107,14 +108,14 @@ void usart1_isr(void) {
     if (i < 4) {
         rxmsg[i] = usart_recv(USART1);
         i++;
-        if (rxmsg[j] == '\r') {  //  User Input Enter
+        if (rxmsg[j] == '\r') {  ///< User Input Enter
                 while (j < (i-1)) {
                     if ((rxmsg[j] >= 48 && rxmsg[j] <= 57)) {
                         //  Valid input (numbers)
                         aux_min_max = aux_min_max*10 + (rxmsg[i]-48);
                         j++;
                     } else {
-                        uart_send("\r\nInvalid, input only integers\r\n");
+                        uart_send("\r\nInvalid, input only integers\r\n"); ///< This message will be displayed
                         break;
                 }
             }
@@ -130,7 +131,7 @@ void usart1_isr(void) {
             timer_enable_counter(TIM2);
         }
     } else {
-        uart_send("\r\nError\r\n");
+        uart_send("\r\nError\r\n"); ///< This message will be displayed
         i = 0;
         adc_power_on(ADC1);
         timer_enable_counter(TIM2);
@@ -147,13 +148,13 @@ void usart1_isr(void) {
 */
 
 void tim2_isr(void) {
-    timer_clear_flag(TIM2, TIM_SR_UIF);  ///  Turn off flag
+    timer_clear_flag(TIM2, TIM_SR_UIF);  ///< Turn off flag
 
     uint16_t adc_read;
     adc_read = (read_adc(1) * 330 / 4095);
 
 /** Comparing the value received from the adc with the maximum
-* to turn on the led on pin A5.
+* to turn on the LED on pin A5.
 */
     if (adc_read > max) {
         gpio_clear(GPIOA, GPIO5);
@@ -162,7 +163,7 @@ void tim2_isr(void) {
         tmp[55]='O',tmp[56]='F',tmp[57]='F';
 
 /** Comparing the value received from the adc with the minimum
-* to turn on the led on pin A7.
+* to turn on the LED on pin A7.
 */
     } else if (adc_read < min) {
         gpio_clear(GPIOA, GPIO7);
@@ -172,7 +173,7 @@ void tim2_isr(void) {
     }
 
 /** Comparing the value received from the adc with the minimum
-* and maximum to turn off both leds.
+* and maximum to turn off both LEDs.
 */
     else {
         gpio_set(GPIOA, GPIO7);
@@ -184,7 +185,7 @@ void tim2_isr(void) {
 /** In order to evaluate the temperature every .5 seconds the 
 * following structure is implemented.
 */
-    if (k == 4) {  ///  Send Temp every 0.5 seg
+    if (k == 4) {  ///< Send Temp every 0.5 seg
         k = 0;
         char t = 2;
         char index = 8;
@@ -193,7 +194,7 @@ void tim2_isr(void) {
             adc_read/=10;
         }while(t--);
 
-        /// Send Temp
+        ///< Send variable tmp and limits to display on terminal
         uart_send(tmp);
         tmp[17] = maxTmp[0],tmp[18] = maxTmp[1],tmp[19] = maxTmp[2];
         tmp[28] = minTmp[0],tmp[29] = minTmp[1],tmp[30] = minTmp[2];
