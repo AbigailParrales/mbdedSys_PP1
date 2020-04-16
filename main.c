@@ -1,20 +1,20 @@
-/**********************
-* Copyright 2020 ITESM                                            *
-*                                                                 *                                                                                     *
-* ADC_UART                                                        *
-*                                                                 *
-* By                                                              *
-* Jesús Enrique Luna Medina A01632334                             *
-* Daniela abigail Parrales Mejía A01228629                        *
-* Luis Cortés Leal A01631163                                      *
-*                                                                 *
-* Abril 2020                                                      *
-* The project titled ADC_UART is carried out with the purpose of  *
-* implementing a temperature sensing system which acquires the    *
-* values from the environment and delivers a response through     *
-* hardware using LEDs and software displaying on a Terminal.      *
-*                                                                 *
-**********************/
+/**********************************************************************************
+* Copyright 2020 ITESM                                                            *
+*                                                                                 *                                                                                     *
+* ADC_UART                                                                        *
+*                                                                                 *
+* By                                                                              *
+* Jesús Enrique Luna Medina A01632334                                             *
+* Daniela abigail Parrales Mejía A01228629                                        *
+* Luis Cortés Leal A01631163                                                      *
+*                                                                                 *
+* Abril 2020                                                                      *
+* The project titled ADC_UART is carried out with the purpose of                  *
+* implementing a temperature sensing system which acquires the                    *
+* values from the environment and delivers a response through                     *
+* hardware using LEDs and software displaying on a Terminal.                      *
+*                                                                                 *
+**********************************************************************************/
 
 ///FUNCTIONS
 /**
@@ -40,19 +40,19 @@
 #include "unsere_timer.h"
 #include "unsere_uart.h"
 
-/************************/
+/*********************************************************************************/
 
 char tmp[]=("Temp: XXXC| Max: 200C| Min: 100C| TMPmax: Off| TMPmin: Off \r\n");
-char rxmsg[4] = "x";
-int16_t max = 200, min = 100;
 char maxTmp[]="200";
 char minTmp[]="100";
-int i = 0;
-int j = 0;
-int k = 0;
+char rxmsg[4] = "x";
+
+int16_t max = 200, min = 100;
 int16_t aux_min_max = 0;
 
-/************************/
+int i = 0, j = 0, k = 0;
+
+/*********************************************************************************/
 
 int main(void) {
     rcc_clock_setup_in_hse_8mhz_out_72mhz(); ///  Use this for "blue pill"
@@ -67,19 +67,21 @@ int main(void) {
     return 0;
 }
 
-/************************/
+/*********************************************************************************/
 
-/** Interruption from uart, the x and n keys are configurate 
-* in order to set the maximum temperature and the minimum.
-* Also with the restriction of entering letters instead of numbers 
-* and displaying a message to inform the user of that warning.
-*/
+/**********************************************************************************
+* Interruption of uart, the x and n keys are configurate                          *
+* in order to set the maximum temperature and the minimum.                        *
+* Also with the restriction of entering letters instead of numbers                *
+* and displaying a message to inform the user of that warning.                    *
+**********************************************************************************/                    
 
 void usart1_isr(void) {
     USART1_SR = ~(1<<5);  //  borrar bandera
     char flag_set_min_max = 0;
 
-/** When the 'n' is pressed, the configuration to set the miminum
+/**
+* When the 'n' is pressed, the configuration to set the miminum
 * temperature is displayed.
 */
 
@@ -139,14 +141,15 @@ void usart1_isr(void) {
     }
 }
 
-/************************/
+**********************************************************************************/
 
-/** The interruption of the used timer. Inside we found the 
-* convertion from the reading of the adc and it is compared 
-* the minimum with that value and also the maximum with the 
-* read value. Depending the conditions will turn on or turn 
-* off the leds.
-*/
+/********************************************************************************** 
+* The interruption of the used timer. Inside we found the                         *
+* convertion from the reading of the adc and it is compared                       *
+* the minimum with that value and also the maximum with the                       *
+* read value. Depending the conditions will turn on or turn                       *
+* off the leds.                                                                   * 
+**********************************************************************************/
 
 void tim2_isr(void) {
     timer_clear_flag(TIM2, TIM_SR_UIF);  ///  Turn off flag
@@ -155,7 +158,8 @@ void tim2_isr(void) {
     adc_read = (read_adc(1) * 330 / 4095);
 
 /** Comparing the value received from the adc with the maximum
-* to turn on the led on pin A5.
+* and maximum temperature assigned to turn on the respective led,
+* also  displays which is on or off.
 */
     if (adc_read > max) {
         gpio_clear(GPIOA, GPIO5);
@@ -167,9 +171,6 @@ void tim2_isr(void) {
         tmp[56]='F';
         tmp[57]='F';
 
-/** Comparing the value received from the adc with the minimum
-* to turn on the led on pin A7.
-*/
     } else if (adc_read < min) {
         gpio_clear(GPIOA, GPIO7);
         gpio_set(GPIOA, GPIO5);
@@ -179,12 +180,7 @@ void tim2_isr(void) {
         tmp[55]='O';
         tmp[56]='N';
         tmp[57]=' ';
-    }
-
-/** Comparing the value received from the adc with the minimum
-* and maximum to turn off both leds.
-*/
-    else {
+    }else {
         gpio_set(GPIOA, GPIO7);
         gpio_set(GPIOA, GPIO5);
         tmp[42]='-';
