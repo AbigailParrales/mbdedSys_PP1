@@ -25,6 +25,14 @@
 
 /********************************************************************/
 
+/*********************************************************************
+* To configurate GPIO it has to be enabled the correct clock if a    *
+* necessary clock is not enabled, the system will not work, must be  *
+* careful working with these.                                        *
+* The clock are related to power consumption, it is very important   *
+* for the state off the battery                                      *
+*********************************************************************/
+
 void gpio_setup(void) {
     ///<  Enable GPIOA for ADC
     rcc_periph_clock_enable(RCC_GPIOA);
