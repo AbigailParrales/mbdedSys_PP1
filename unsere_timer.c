@@ -45,9 +45,7 @@ void timer_setup(void) {
     timer_disable_irq(TIM2, TIM_DIER_UIE);
 
     ///< Configuration to establish an specific operating mode
-    timer_set_mode(TIM2, 
-                   TIM_CR1_CKD_CK_INT,
-                   TIM_CR1_CMS_EDGE,
+    timer_set_mode(TIM2, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_EDGE,
                    TIM_CR1_DIR_UP);
     timer_set_prescaler(TIM2, 7200);
 
