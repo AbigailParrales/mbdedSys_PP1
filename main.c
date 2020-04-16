@@ -9,6 +9,7 @@
 * Luis Cortés Leal A01631163                                      *
 *                                                                 *
 * Abril 2020                                                      *
+*                                                                 *
 * The project titled ADC_UART is carried out with the purpose of  *
 * implementing a temperature sensing system which acquires the    *
 * values from the environment and delivers a response through     *
