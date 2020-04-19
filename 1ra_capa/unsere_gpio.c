@@ -18,12 +18,44 @@
 *                                                                    *
 *********************************************************************/
 
-#include <libopencm3/stm32/rcc.h>
+//#include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
 
 #include "unsere_gpio.h"
 
 /********************************************************************/
+
+void gpio_setups_for_adc(void) {
+    ///<  Enable GPIOA for ADC
+    gpio_set_mode(GPIOA,
+                  GPIO_MODE_INPUT,
+                  GPIO_CNF_INPUT_ANALOG,
+                  GPIO0|GPIO1);
+}
+
+void gpio_setups_for_uart(void) {
+    gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_ANALOG,
+    GPIO0);
+
+    ///<  Enable UART TX (PA9)
+    ///< In order to use the pin A9 to transmit the information.
+    gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ, 
+		  GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, GPIO_USART1_TX);
+
+    ///<  Enable UART RX (PA10)
+    ///< In order to use the pin A10 to read the information.
+    gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_PULL_UPDOWN,
+                  GPIO_USART1_RX);
+}
+
+void gpio_setups_for_LEDs(void) {
+    ///< Set GPIOA5,A7 for LEDs
+    gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_2_MHZ, 
+                  GPIO_CNF_OUTPUT_PUSHPULL, GPIO5|GPIO7);
+    
+    ///< LEDs are turned off
+    gpio_set(GPIOA, GPIO5|GPIO7);
+}
 
 /*********************************************************************
 * To configurate GPIO it has to be enabled the correct clock if a    *
@@ -34,18 +66,8 @@
 *********************************************************************/
 
 void gpio_setup(void) {
-    ///<  Enable GPIOA for ADC
-    rcc_periph_clock_enable(RCC_GPIOA);
-    gpio_set_mode(GPIOA,
-                  GPIO_MODE_INPUT,
-                  GPIO_CNF_INPUT_ANALOG,
-                  GPIO0|GPIO1);
-
-    ///< Set GPIOA5,A7 for LEDs
-    gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_2_MHZ, 
-                  GPIO_CNF_OUTPUT_PUSHPULL, GPIO5|GPIO7);
-    
-    ///< LEDs are turned off
-    gpio_set(GPIOA, GPIO5|GPIO7);
+    gpio_setups_for_adc();
+    gpio_setups_for_uart();
+    gpio_setups_for_LEDs();
 }
     

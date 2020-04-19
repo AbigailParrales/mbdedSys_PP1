@@ -18,42 +18,18 @@
 *                                                                    *
 *********************************************************************/
 
-#include <libopencm3/stm32/rcc.h>
-#include <libopencm3/stm32/timer.h>
-#include <libopencm3/cm3/nvic.h>
+#ifndef UNSERE_UART_H
+#define UNSERE_UART_H
+
+#include <stdint.h>
 
 /********************************************************************/
 
-#include "unsere_timer.h"
+void uart_setup(void);
+void uart_send(char * txt);
+extern int16_t max;
+extern int16_t min;
 
 /********************************************************************/
 
-/*********************************************************************
-* A timer is a very important for systems, it has a lot of           *
-* applications, one is delay routine that robs other tasks of CPU    *
-* time that have been used to be more productive.                    *
-*                                                                    *
-*********************************************************************/
-
-void timer_setup(void) {
-    
-    ///< To configure a timer it is enabled the number and AFIO´s clock
-    rcc_periph_clock_enable(RCC_TIM2);
-    rcc_periph_clock_enable(RCC_AFIO);
-
-    timer_disable_counter(TIM2);
-    timer_disable_irq(TIM2, TIM_DIER_UIE);
-
-    ///< Configuration to establish an specific operating mode
-    timer_set_mode(TIM2, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_EDGE,
-                   TIM_CR1_DIR_UP);
-    timer_set_prescaler(TIM2, 7200);
-
-    timer_disable_preload(TIM2);
-    timer_continuous_mode(TIM2);
-    timer_set_period(TIM2, 1000);  ///<  Equals to 10 miliseconds
-
-    nvic_enable_irq(NVIC_TIM2_IRQ);
-    timer_enable_irq(TIM2, TIM_DIER_UIE);
-    timer_enable_counter(TIM2);
-}
+#endif

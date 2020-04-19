@@ -23,6 +23,9 @@
 
 /********************************************************************/
 
+void gpio_setups_for_adc(void);
+void gpio_setups_for_uart(void);
+void gpio_setups_for_LEDs(void);
 void gpio_setup(void);
 
 /********************************************************************/

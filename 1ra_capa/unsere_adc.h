@@ -21,6 +21,8 @@
 #ifndef UNSERE_ADC_H  
 #define UNSERE_ADC_H 
 
+#include <stdint.h>
+
 /********************************************************************/
 
 void ADC_setup(void);

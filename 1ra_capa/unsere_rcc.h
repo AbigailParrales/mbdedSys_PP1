@@ -18,14 +18,17 @@
 *                                                                    *
 *********************************************************************/
 
-#ifndef UNSERE_UART_H
-#define UNSERE_UART_H
-
+#ifndef UNSERE_RCC_H  
+#define UNSERE_RCC_H 
 
 /********************************************************************/
 
-void uart_setup(void);
-void uart_send(char * txt);
+void setting_clock(void);
+void rcc_setups_for_adc(void);
+void rcc_setups_for_gpio(void);
+void rcc_setups_for_timer(void);
+void rcc_setups_for_uart(void);
+void rcc_setup(void);
 
 /********************************************************************/
 

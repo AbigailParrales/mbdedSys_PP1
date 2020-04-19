@@ -18,10 +18,11 @@
 *                                                                    *
 *********************************************************************/
 
-#include <libopencm3/stm32/rcc.h>
+//#include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/adc.h>
 
 #include "unsere_adc.h"
+//#include "unsere_rcc.h"
 
 /********************************************************************/
 
@@ -33,11 +34,8 @@
 *********************************************************************/
 
 void ADC_setup(void) {
-    rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_ADC1EN);
     adc_power_off(ADC1);
-    rcc_peripheral_reset(&RCC_APB2RSTR, RCC_APB2RSTR_ADC1RST);
-    rcc_peripheral_clear_reset(&RCC_APB2RSTR, RCC_APB2RSTR_ADC1RST);
-    rcc_set_adcpre(RCC_CFGR_ADCPRE_PCLK2_DIV6);    ///< Set. 12MHz, Max. 14MHz
+
     adc_set_dual_mode(ADC_CR1_DUALMOD_IND);        ///<  Independent mode
     adc_disable_scan_mode(ADC1);
     adc_set_right_aligned(ADC1);
