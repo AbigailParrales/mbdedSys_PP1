@@ -18,10 +18,9 @@
 *                                                                       *
 ************************************************************************/
 
-//#include <libopencm3/stm32/rcc.h>
-
 /*!< LIBRARIES */
 
+/*!< #include <libopencm3/stm32/rcc.h> */
 #include "../1ra_capa/unsere_gpio.h"
 #include "../1ra_capa/unsere_adc.h"
 #include "../1ra_capa/unsere_timer.h"
@@ -40,3 +39,5 @@ void temp_sense_init(void) {
     uart_setup();
     timer_setup();
 }
+
+/***********************************************************************/
