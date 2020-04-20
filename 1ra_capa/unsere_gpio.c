@@ -18,7 +18,8 @@
 *                                                                       *
 ************************************************************************/
 
-//#include <libopencm3/stm32/rcc.h>
+/*!< LIBRARIES */
+/*!< #include <libopencm3/stm32/rcc.h> */
 #include <libopencm3/stm32/gpio.h>
 
 #include "unsere_gpio.h"
@@ -26,6 +27,7 @@
 /***********************************************************************/
 
 void gpio_setups_for_adc(void) {
+	
     /*!<  Enable GPIOA for ADC */
     gpio_set_mode(GPIOA,
                   GPIO_MODE_INPUT,
@@ -37,18 +39,21 @@ void gpio_setups_for_uart(void) {
     gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_ANALOG,
     GPIO0);
 
-    /*!<  Enable UART TX (PA9) */
-    ///< In order to use the pin A9 to transmit the information.
+    /**  Enable UART TX (PA9) 
+     * In order to use the pin A9 to transmit the information. 
+     */
     gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_50_MHZ, 
 		  GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, GPIO_USART1_TX);
 
-    /*!<  Enable UART RX (PA10) */
-    ///< In order to use the pin A10 to read the information.
+    /**  Enable UART RX (PA10) 
+     *    In order to use the pin A10 to read the information. 
+     */
     gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_PULL_UPDOWN,
                   GPIO_USART1_RX);
 }
 
 void gpio_setups_for_LEDs(void) {
+	
     /*!< Set GPIOA5,A7 for LEDs */
     gpio_set_mode(GPIOA, GPIO_MODE_OUTPUT_2_MHZ, 
                   GPIO_CNF_OUTPUT_PUSHPULL, GPIO5|GPIO7);
@@ -72,3 +77,4 @@ void gpio_setup(void) {
     gpio_setups_for_LEDs();
 }
     
+/***********************************************************************/
