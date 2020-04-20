@@ -1,5 +1,4 @@
   
-
 /************************************************************************
 * Copyright 2020 ITESM                                                  *
 *                                                                       *
@@ -19,11 +18,13 @@
 *                                                                       *
 ************************************************************************/
 
+/*!< Conditions to confirm if macro-identifier is defined */
 #ifndef UNSERE_RCC_H  
 #define UNSERE_RCC_H 
 
 /***********************************************************************/
 
+/*!< All the settings of the components for the system are included */
 void setting_clock(void);
 void rcc_setups_for_adc(void);
 void rcc_setups_for_gpio(void);
@@ -34,3 +35,5 @@ void rcc_setup(void);
 /***********************************************************************/
 
 #endif
+
+/***********************************************************************/
