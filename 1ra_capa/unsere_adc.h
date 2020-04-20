@@ -17,9 +17,13 @@
 * hardware using LEDs and software displaying on a Terminal.            *
 *                                                                       *
 ************************************************************************/
+
+/*!< Conditions to confirm if macro-identifier is defined */
+
 #ifndef UNSERE_ADC_H  
 #define UNSERE_ADC_H 
 
+/*!< LIBRARIES */
 #include <stdint.h>
 
 /***********************************************************************/
@@ -30,3 +34,5 @@ uint16_t read_adc(uint8_t channel);
 /***********************************************************************/
 
 #endif
+
+/***********************************************************************/
