@@ -50,7 +50,7 @@ void rcc_setups_for_timer(void) {
 
 void rcc_setups_for_uart(void) {
     
-    /*!< To configure a timer it is enabled for uaart to be used */
+    /*!< To configure a timer it is enabled for uart to be used */
     rcc_periph_clock_enable(RCC_GPIOA);
     rcc_periph_clock_enable(RCC_USART1);
 }
