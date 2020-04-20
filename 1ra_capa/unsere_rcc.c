@@ -18,21 +18,27 @@
 *                                                                       *
 ************************************************************************/
 
+/*!< LIBRARIES */
 #include <libopencm3/stm32/rcc.h>
 
 #include "unsere_rcc.h"
 
 /***********************************************************************/
 
+/*!< All the instances are configurted */
 void setting_clock(void) {
-    rcc_clock_setup_in_hse_8mhz_out_72mhz(); /*!< Use this for "blue pill" */
+    
+    /*!< Use this for "blue pill" */
+    rcc_clock_setup_in_hse_8mhz_out_72mhz(); 
 }
 
 void rcc_setups_for_adc(void) {
     rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_ADC1EN);
     rcc_peripheral_reset(&RCC_APB2RSTR, RCC_APB2RSTR_ADC1RST);
     rcc_peripheral_clear_reset(&RCC_APB2RSTR, RCC_APB2RSTR_ADC1RST);
-    rcc_set_adcpre(RCC_CFGR_ADCPRE_PCLK2_DIV6);    /*!< Set. 12MHz, Max. 14MHz */
+    
+    /*!< Set. 12MHz, Max. 14MHz */
+    rcc_set_adcpre(RCC_CFGR_ADCPRE_PCLK2_DIV6);    
 }
 
 void rcc_setups_for_gpio(void) {
@@ -62,3 +68,5 @@ void rcc_setup(void) {
     rcc_setups_for_timer();
     rcc_setups_for_uart();
 }
+
+/***********************************************************************/
