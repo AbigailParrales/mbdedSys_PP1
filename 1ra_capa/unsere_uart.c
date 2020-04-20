@@ -31,11 +31,17 @@
 
 /********************************************************************/
 
-int16_t max = 150, min = 50;
-
-char rxmsg[4] = "x"; ///< Key pressed to configure superior limit
-int i = 0, j = 0;
+int max = 150, min = 50;
 int16_t aux_min_max = 0; ///< Used for receive the letter entered from the keyboard
+int16_t number_received = 0;
+
+int i = 0;
+int j = 0;
+int p_index = 0;
+int parsing_in_process = 0;
+int changing_limits = 0;
+
+char rxmsg[4] = "---"; ///< Key pressed to configure superior limit
 
 /********************************************************************
 * The creation of a message, will an specificed limit, the message  *
@@ -66,6 +72,68 @@ void uart_send(char * txt) {
     }
 }
 
+void parse_message(char *message_expected, char char_received) {
+    if(char_received == message_expected[p_index]){
+        if(!parsing_in_process) {   //Inicio del mensaje
+            parsing_in_process = 1;
+        } else if(char_received == '\0'){    //End of message
+            parsing_in_process = -1;    //[PARSE SUCCESSFULL]
+            p_index = -1;   //with the addition it turns into 0
+        }
+        p_index++;
+    }
+    else{
+        parsing_in_process = 0;
+        p_index = 0;
+    }
+}
+
+int is_number(char ch) {
+    if((ch >= 48) && (ch<=57)){
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+char* number_2_string(int num) {
+    int tmp_num = num;
+
+    static char tmp_s[4];
+
+    char centenas = 0;
+    char decenas = 0;
+    char unidades = 0;
+
+    unidades = tmp_num%10;
+    decenas = ((tmp_num%100) - unidades) / 10;
+    centenas = ((tmp_num%1000)-((decenas*10)+unidades))/100;
+
+    tmp_s[0] = centenas + 48;
+    tmp_s[1] = decenas + 48;
+    tmp_s[2] = unidades + 48;
+
+    uart_send(tmp_s);
+
+    return tmp_s;
+}
+
+void log_number(int num) {
+    char centenas = 0;
+    char decenas = 0;
+    char unidades = 0;
+
+    int tmp_num = num;
+
+    unidades = tmp_num%10;
+    decenas = ((tmp_num%100) - unidades) / 10;
+    centenas = ((tmp_num%1000)-((decenas*10)+unidades))/100;
+
+    usart_send_blocking(USART1, (centenas + 48));
+    usart_send_blocking(USART1, (decenas + 48));
+    usart_send_blocking(USART1, (unidades + 48));
+}
+
 /********************************************************************/
 
 /** Interruption from uart, the x and n keys are configurate 
@@ -76,65 +144,132 @@ void uart_send(char * txt) {
 
 void usart1_isr(void) {
     USART1_SR = ~(1<<5);  ///< Erase flag
-    char flag_set_min_max = 0;
     char c_received = usart_recv(USART1);
+
     usart_send_blocking(USART1, c_received);
 
-    /** When the 'n' is pressed, the configuration to set the miminum
-    * temperature is displayed.
-    */
-    if (c_received == 'n') {
-        timer_disable_counter(TIM2);
-        adc_power_off(ADC1);
-        uart_send("Set Min: ");
-        flag_set_min_max = 1;
-    }
+    //First character of a sequence received (i == 0) AND
+    //NOT in process of changing limits AND 
+    //NOT a number
+    if ((i == 0) && ((!changing_limits) && (!is_number(c_received)))) {  
+        //uart_send("\r\nFirst char received\n\r"); 
+        if (c_received == 'n') { // changing minimum?
+            changing_limits = -2;   //indicating change tentative2minimum
 
-    /** When the 'x' is pressed, the configuration to set the maximum
-    * temperature is displayed.
-    */
-
-    if (c_received == 'x') {
-        timer_disable_counter(TIM2);
-        adc_power_off(ADC1);
-        uart_send("Set Max: ");
-        flag_set_min_max = 2;
-    }
-
-    /** The value written by the user is verified if there are only 
-    * numbers, if there is a letter in that space, the terminal will 
-    * display a warning message. If there are only numbers the characters
-    * are sent.
-    */
-    if (i < 4) {
-        rxmsg[i] = usart_recv(USART1);
-        i++;
-        if (rxmsg[j] == '\r') {  ///< User Input Enter
-                while (j < (i-1)) {
-                    if ((rxmsg[j] >= 48 && rxmsg[j] <= 57)) {
-                        //  Valid input (numbers)
-                        aux_min_max = aux_min_max*10 + (rxmsg[i]-48);
-                        j++;
-                    } else {
-                        uart_send("\r\nInvalid, input only integers\r\n"); ///< This message will be displayed
-                        break;
-                }
-            }
-
-            if (flag_set_min_max == 2) {
-                    max = aux_min_max;
-            } else if (flag_set_min_max == 1) {
-                    min = aux_min_max;
-            }
-
-            i = 0;
-            adc_power_on(ADC1);
-            timer_enable_counter(TIM2);
+            timer_disable_counter(TIM2);
+            //adc_power_off(ADC1);
+            uart_send("\r\nPlease confirm pressing Enter\n\r");
         }
-    } else {
-        uart_send("\r\nError\r\n"); ///< This message will be displayed
-        i = 0;
-        adc_power_on(ADC1);
-        timer_enable_counter(TIM2);
+        if (c_received == 'x') { // changing maximum?
+            changing_limits = 2;    //indicating change tentative2maximum
+
+            timer_disable_counter(TIM2);
+            //adc_power_off(ADC1);
+            uart_send("\r\nPlease confirm pressing Enter\n\r");
+        }
+    }
+    //In tentative2minimum or in tentative2maximum
+    else if ((i == 0) && ((changing_limits == -2) || (changing_limits == 2))) {
+        if ((changing_limits == -2)) {   // tentative2minimum
+            //uart_send("\r\ntentative2minimum\n\r");
+            if (c_received == '\r'){    // Enter pressed
+                changing_limits = -1;
+                uart_send("Set Min: [include leading zero(s)]\r\n");
+            }
+            else {  //incorrect sequence
+                uart_send("\r\nIncorrect sequence\r\n");
+                changing_limits = 0;
+
+                adc_power_on(ADC1);
+                timer_enable_counter(TIM2);
+            }
+        }
+        if ((changing_limits == 2)) {   // tentative2maximum
+            //uart_send("\r\ntentative2maximum\n\r");
+            if (c_received == '\r'){    // Enter pressed
+                changing_limits = 1;
+                uart_send("Set Max: [include leading zero(s)]\r\n");
+            }
+            else {  //incorrect sequence
+                uart_send("\r\nIncorrect sequence\r\n");
+
+                changing_limits = 0;
+
+                adc_power_on(ADC1);
+                timer_enable_counter(TIM2);
+            }
+        }
+    }
+    //Not first character received and in changing_limits process
+    else if (((changing_limits == -1) || (changing_limits == 1))) {
+        //uart_send("\r\nEstoy en el Else If\n\r");
+        if ((changing_limits == -1)) {   // 2minimum
+            uart_send("\r\nChanging minimum...\n\r");
+            if (is_number(c_received) && (i < 4)){  //proceding with receiving
+                rxmsg[i] = c_received;
+                number_received = (number_received*10) + (c_received-48);
+
+                uart_send("\r\nYou've entered: ");
+                uart_send(rxmsg);
+                uart_send("\r\n");
+                i++;
+            }
+            else if ((c_received == '\r') && (i < 4)) { //successfull change
+                uart_send("\r\nNumber Entered\r\n");
+                min = number_received;
+                uart_send("\r\nMinimum Umbral Changed to: ");
+                uart_send(number_2_string(min));
+                uart_send("!!!\r\n");
+
+                i = 0;
+                changing_limits = 0;
+
+                adc_power_on(ADC1);
+                timer_enable_counter(TIM2);
+            }
+            else { //Incorrect char OR exceded lenght
+                uart_send("\r\nError\r\n");
+
+                i = 0;
+                changing_limits = 0;
+
+                adc_power_on(ADC1);
+                timer_enable_counter(TIM2);
+            }
+        }
+        if ((changing_limits == 1)) {   // 2maximum
+            uart_send("\r\nChanging maximum...\n\r");
+            if (is_number(c_received) && (i < 4)){  //proceding with receiving
+                rxmsg[i] = c_received;
+                number_received = (number_received*10) + (c_received-48);
+
+                uart_send("\r\nYou've entered: ");
+                uart_send(rxmsg);
+                uart_send("\r\n");
+                i++;
+            }
+            else if ((c_received == '\r') && (i < 4)) { //successfull change
+                uart_send("\r\nNumber Entered\r\n");
+                max = number_received;
+                uart_send("\r\nMaximum Umbral Changed to: ");
+                uart_send(number_2_string(max));
+                uart_send("!!!\r\n");
+
+                i = 0;
+                changing_limits = 0;
+
+                adc_power_on(ADC1);
+                timer_enable_counter(TIM2);
+            }
+            else { //Incorrect char OR exceded lenght
+                uart_send("\r\nError\r\n");
+
+                i = 0;
+                changing_limits = 0;
+
+                adc_power_on(ADC1);
+                timer_enable_counter(TIM2);
+            }
+        }
     }
 }

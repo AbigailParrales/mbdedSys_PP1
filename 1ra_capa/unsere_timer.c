@@ -33,10 +33,7 @@
 
 /********************************************************************/
 
-int k = 0;
-char maxTmp[]="150"; ///< The maximum limit of the system
-char minTmp[]="050"; ///< The minimum limit of the system
-char tmp[]=("Temp: ---C| Max: ---C| Min: ---C| TMPmax: ---| TMPmin: --- \r\n"); ///< Message display on terminal
+int inner_counts = 0;
 
 /*********************************************************************
 * A timer is a very important for systems, it has a lot of           *
@@ -56,7 +53,7 @@ void timer_setup(void) {
 
     timer_disable_preload(TIM2);
     timer_continuous_mode(TIM2);
-    timer_set_period(TIM2, 1000);  ///<  Equals to 10 miliseconds
+    timer_set_period(TIM2, 5000);  ///<  Equals to 50 miliseconds
 
     nvic_enable_irq(NVIC_TIM2_IRQ);
     timer_enable_irq(TIM2, TIM_DIER_UIE);
@@ -84,8 +81,6 @@ void tim2_isr(void) {
     if (adc_read > max) {
         LED_ON_PTA5();
         LED_OFF_PTA7();
-        tmp[42]='O',tmp[43]='N',tmp[44]=' ';
-        tmp[55]='O',tmp[56]='F',tmp[57]='F';
 
     /** Comparing the value received from the adc with the minimum
     * to turn on the LED on pin A7.
@@ -93,39 +88,18 @@ void tim2_isr(void) {
     } else if (adc_read < min) {
         LED_OFF_PTA5();
         LED_ON_PTA7();
-        tmp[42]='O',tmp[43]='F',tmp[44]='F';
-        tmp[55]='O',tmp[56]='N',tmp[57]=' ';
     }
 
-    /** Comparing the value received from the adc with the minimum
-    * and maximum to turn off both LEDs.
-    */
-    /*
-    else {
-        LED_OFF_PTA5();
-        LED_OFF_PTA7();
-        tmp[42]='-', tmp[43]='-', tmp[44]='-';
-        tmp[55]='-', tmp[56]='-', tmp[57]='-';
-    }
-    */
+    //Login temperature
 
-    /** In order to evaluate the temperature every .5 seconds the 
-    * following structure is implemented.
-    */
-    if (k == 4) {  ///< Send Temp every 0.5 seg
-        k = 0;
-        char t = 2;
-        char index = 8;
-        do {
-            tmp[index--] = (adc_read%10) + 48;
-            adc_read/=10;
-        }while(t--);
+    uart_send("\r\nTemp: ");
+    log_number(adc_read);
+    
+    uart_send("    Max: ");
+    log_number(max);
 
-        ///< Send variable tmp and limits to display on terminal
-        uart_send(tmp);
-        tmp[17] = maxTmp[0],tmp[18] = maxTmp[1],tmp[19] = maxTmp[2];
-        tmp[28] = minTmp[0],tmp[29] = minTmp[1],tmp[30] = minTmp[2];
-    } else {
-        k++;
-    }
+    uart_send("    Min: ");
+    log_number(min);
+
+    uart_send("\r\n");
 }

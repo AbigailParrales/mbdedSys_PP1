@@ -25,10 +25,16 @@
 
 /********************************************************************/
 
+extern int max;
+extern int min;
+
+
 void uart_setup(void);
 void uart_send(char * txt);
-extern int16_t max;
-extern int16_t min;
+void parse_message(char *message_expected, char char_received);
+int is_number(char ch);
+char* number_2_string(int num);
+void log_number(int num);
 
 /********************************************************************/
 
