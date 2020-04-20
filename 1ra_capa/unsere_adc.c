@@ -18,11 +18,11 @@
 *                                                                       *
 ************************************************************************/
 
-//#include <libopencm3/stm32/rcc.h>
+/*!< #include <libopencm3/stm32/rcc.h> */
 #include <libopencm3/stm32/adc.h>
 
 #include "unsere_adc.h"
-//#include "unsere_rcc.h"
+/*!< #include "unsere_rcc.h" */
 
 /***********************************************************************/
 
@@ -61,3 +61,5 @@ uint16_t read_adc(uint8_t channel) {
     while ( !adc_eoc(ADC1) ) {}
     return adc_read_regular(ADC1);
 }
+
+/***********************************************************************/
