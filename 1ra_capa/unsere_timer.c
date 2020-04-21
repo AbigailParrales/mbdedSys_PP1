@@ -106,3 +106,5 @@ void tim2_isr(void) {
     log_temperature(adc_read, obtain_max(), obtain_min(), umbral_bajo, umbral_alto);
 
 }
+
+/********************************************************************/
