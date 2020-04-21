@@ -99,16 +99,5 @@ void tim2_isr(void) {
     //Login temperature
     log_temperature(adc_read, obtain_max(), obtain_min());
     log_3digs_number(obtain_min());
-    /*
-    uart_send("\r\nTemp: ");
-    log_number(adc_read);
-    
-    uart_send("    Max: ");
-    log_number(max);
 
-    uart_send("    Min: ");
-    log_number(min);
-
-    uart_send("\r\n");
-    */
 }
