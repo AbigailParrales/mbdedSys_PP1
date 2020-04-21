@@ -19,8 +19,6 @@
 ************************************************************************/
 
 /*!< LIBRARIES */
-
-/*!< #include <libopencm3/stm32/rcc.h> */
 #include "../1ra_capa/unsere_gpio.h"
 #include "../1ra_capa/unsere_adc.h"
 #include "../1ra_capa/unsere_timer.h"
