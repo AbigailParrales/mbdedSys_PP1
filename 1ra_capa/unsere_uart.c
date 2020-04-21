@@ -1,32 +1,28 @@
 
-/*********************************************************************
-* Copyright 2020 ITESM                                               *
-*                                                                    *
-*                                                                    *
-* ADC_UART                                                           *
-*                                                                    *
-* By                                                                 *
-* Jesús Enrique Luna Medina A01632334                                *
-* Daniela abigail Parrales Mejía A01228629                           *
-* Luis Cortés Leal A01631163                                         *
-*                                                                    *
-* Abril 2020                                                         *
-* The project titled ADC_UART is carried out with the purpose of     *
-* implementing a temperature sensing system which acquires the       *
-* values from the environment and delivers a response through        *
-* hardware using LEDs and software displaying on a Terminal.         *
-*                                                                    *
-*********************************************************************/
+/************************************************************************
+* Copyright 2020 ITESM                                                  *
+*                                                                       *
+*                                                                       *
+* ADC_UART                                                              *
+*                                                                       *
+* Autorhs:                                                              *
+* Jesús Enrique Luna Medina          A01632334                          *
+* Daniela abigail Parrales Mejía     A01228629                          *
+* Luis Cortés Leal                   A01631163                          *
+*                                                                       *
+* Abril 2020                                                            *
+* The project titled ADC_UART is carried out with the purpose of        *
+* implementing a temperature sensing system which acquires the          *
+* values from the environment and delivers a response through           *
+* hardware using LEDs and software displaying on a Terminal.            *
+*                                                                       *
+************************************************************************/
 
-//#include <libopencm3/stm32/rcc.h>
-//#include <libopencm3/stm32/gpio.h>
+/*!< LIBRARIES */
 #include <libopencm3/cm3/nvic.h>
 #include <libopencm3/stm32/usart.h>
-
 #include <libopencm3/stm32/timer.h>
 #include <libopencm3/stm32/adc.h>
-/********************************************************************/
-
 #include "unsere_uart.h"
 #include "../2da_capa/unsere_log.h"
 
@@ -37,20 +33,28 @@ int16_t number_received = 0;
 int max = 150;
 int min = 50;
 
-int i = 0;  //Store the amount of meaningful symbols that have been ingresed
-int p_index = 0;    //Store the index when parsing a message given
-int parsing_in_progress = 0;    //Flag that indicates a parsing in progress
-                                //0 = no parsing in progress
-                                //1 = parsing in progress
-                                //-1 = parsing successful
-int changing_limits = 0;    //Flag for indicating a changing limits process
-                            //0 = no changing limits
-                            //-2 = tentaively changing minimum limits
-                            //2 = tentaively changing maximum limits
-                            //-1 = changing minimum limits
-                            //1 = changing maximum limits
+int i = 0;  /*!< Store the amount of meaningful symbols that have been ingresed */
+int p_index = 0;    /*!< Store the index when parsing a message given */
 
-char rxmsg[4] = "---";  //Storing the received input from user
+/**
+* Flag that indicates a parsing in progress
+* 0 = no parsing in progress
+* 1 = parsing in progress
+* -1 = parsing successful
+*/
+int parsing_in_progress = 0;    
+
+/**Flag for indicating a changing limits process
+* 0 = no changing limits
+* -2 = tentaively changing minimum limits
+* 2 = tentaively changing maximum limits
+* -1 = changing minimum limits
+* 1 = changing maximum limits
+*/
+
+int changing_limits = 0;   
+
+char rxmsg[4] = "---";  /*!< Storing the received input from user */
 
 /********************************************************************
 * The creation of a message, will an specificed limit, the message  *
@@ -62,15 +66,15 @@ char rxmsg[4] = "---";  //Storing the received input from user
 ********************************************************************/
 
 void uart_setup(void) {
-    usart_set_baudrate(USART1, 9600); ///<  Baudrate configurated at 9600
-    usart_set_databits(USART1, 8); ///<  Data will be 8 bit long 
-    usart_set_stopbits(USART1, USART_STOPBITS_1);
+    usart_set_baudrate(USART1, 9600); /*!< Baudrate configurated at 9600 */
+    usart_set_databits(USART1, 8); /*!<  Data will be 8 bit long  */
+    usart_set_stopbits(USART1, USART_STOPBITS_1); 
     usart_set_mode(USART1, USART_MODE_TX_RX);
     usart_set_parity(USART1, USART_PARITY_NONE);
     usart_set_flow_control(USART1, USART_FLOWCONTROL_NONE);
 
-    nvic_enable_irq(NVIC_USART1_IRQ); ///<  Global enable of interruption
-    usart_enable_rx_interrupt(USART1); ///<  Local enable of interruption
+    nvic_enable_irq(NVIC_USART1_IRQ); /*!< Global enable of interruption */
+    usart_enable_rx_interrupt(USART1); /*!< Local enable of interruption */
 
     usart_enable(USART1);
 
@@ -78,11 +82,11 @@ void uart_setup(void) {
 
 void parse_message(char *message_expected, char char_received) {
     if(char_received == message_expected[p_index]){
-        if(!parsing_in_progress) {   //Inicio del mensaje
+        if(!parsing_in_progress) {   /*!< Inicio del mensaje */
             parsing_in_progress = 1;
-        } else if(char_received == '\0'){    //End of message
-            parsing_in_progress = -1;    //[PARSE SUCCESSFULL]
-            p_index = -1;   //with the addition it turns into 0
+        } else if(char_received == '\0'){    /*!< End of message */
+            parsing_in_progress = -1;    /*!< PARSE SUCCESSFULL] */
+            p_index = -1;   /*!< With the addition it turns into 0 */
         }
         p_index++;
     }
@@ -139,36 +143,38 @@ int obtain_max(void) {
 */
 
 void usart1_isr(void) {
-    USART1_SR = ~(1<<5);  ///< Erase flag
+    USART1_SR = ~(1<<5);  /*!< Erase flag */
     char c_received = usart_recv(USART1);
 
     usart_send_blocking(USART1, c_received);
 
-    //First character of a sequence received (i == 0) AND
-    //NOT in process of changing limits AND 
-    //NOT a number
+    /**
+    * First character of a sequence received (i == 0) AND
+    * NOT in process of changing limits AND 
+    * NOT a number
+    */
     if ((i == 0) && ((!changing_limits) && (!is_number(c_received)))) {  
-        //uart_send("\r\nFirst char received\n\r"); 
-        if (c_received == 'n') { // changing minimum?
-            changing_limits = -2;   //indicating change tentative2minimum
+        
+        if (c_received == 'n') { /*!< Changing minimum */
+            changing_limits = -2;   /*!< Indicating change tentative to minimum */
 
             timer_disable_counter(TIM2);
-            //adc_power_off(ADC1);
+            
             log_message("\r\nPlease confirm pressing Enter\n\r");
         }
-        if (c_received == 'x') { // changing maximum?
-            changing_limits = 2;    //indicating change tentative2maximum
+        if (c_received == 'x') { /*!< Changing maximum */
+            changing_limits = 2;    /*!< Indicating change tentative to maximum */
 
             timer_disable_counter(TIM2);
-            //adc_power_off(ADC1);
+            
             log_message("\r\nPlease confirm pressing Enter\n\r");
         }
     }
     //In tentative2minimum or in tentative2maximum
     else if ((i == 0) && ((changing_limits == -2) || (changing_limits == 2))) {
-        if ((changing_limits == -2)) {   // tentative2minimum
-            //uart_send("\r\ntentative2minimum\n\r");
-            if (c_received == '\r'){    // Enter pressed
+        if ((changing_limits == -2)) {   /*!< Tentative to minimum */
+            
+            if (c_received == '\r'){    /*!< Enter pressed */
                 changing_limits = -1;
                 number_received = 0;
                 rxmsg[0] = '-';
@@ -176,7 +182,7 @@ void usart1_isr(void) {
                 rxmsg[2] = '-';
                 log_message("Set Min: [include leading zero(s)]\r\n");
             }
-            else {  //incorrect sequence
+            else {  /*!< Incorrect sequence */
                 log_message("\r\nIncorrect sequence\r\n");
                 changing_limits = 0;
 
@@ -184,9 +190,9 @@ void usart1_isr(void) {
                 timer_enable_counter(TIM2);
             }
         }
-        if ((changing_limits == 2)) {   // tentative2maximum
+        if ((changing_limits == 2)) {   /*!< Tentative to maximum */
             //uart_send("\r\ntentative2maximum\n\r");
-            if (c_received == '\r'){    // Enter pressed
+            if (c_received == '\r'){    /*!< Enter pressed */
                 changing_limits = 1;
                 number_received = 0;
                 rxmsg[0] = '-';
@@ -194,7 +200,7 @@ void usart1_isr(void) {
                 rxmsg[2] = '-';
                 log_message("Set Max: [include leading zero(s)]\r\n");
             }
-            else {  //incorrect sequence
+            else {  /*!< Incorrect sequence */
                 log_message("\r\nIncorrect sequence\r\n");
 
                 changing_limits = 0;
@@ -204,12 +210,12 @@ void usart1_isr(void) {
             }
         }
     }
-    //Not first character received and in changing_limits process
+  
+    /*!< Not first character received and in changing_limits process */
     else if (((changing_limits == -1) || (changing_limits == 1))) {
-        //uart_send("\r\nEstoy en el Else If\n\r");
-        if ((changing_limits == -1)) {   // 2minimum
+        if ((changing_limits == -1)) {   /*!< For minimum */
             log_message("\r\nChanging minimum...\n\r");
-            if (is_number(c_received) && (i < 4)){  //proceding with receiving
+            if (is_number(c_received) && (i < 4)){  /*!< Proceding with receiving */ 
                 rxmsg[i] = c_received;
                 number_received = (number_received*10) + (c_received-48);
 
@@ -218,7 +224,7 @@ void usart1_isr(void) {
                 log_enter();
                 i++;
             }
-            else if ((c_received == '\r') && (i < 4)) { //successfull change
+            else if ((c_received == '\r') && (i < 4)) { /*!< Successfull change */
                 log_message("\r\nNumber Entered\r\n");
                 min = number_received;
                 log_message("\r\nMinimum Umbral Changed to: ");
@@ -230,8 +236,8 @@ void usart1_isr(void) {
 
                 adc_power_on(ADC1);
                 timer_enable_counter(TIM2);
-            }
-            else { //Incorrect char OR exceded lenght
+            } 
+            else { /*!< Incorrect char OR exceded lenght */
                 log_message("\r\nError\r\n");
 
                 i = 0;
@@ -241,9 +247,9 @@ void usart1_isr(void) {
                 timer_enable_counter(TIM2);
             }
         }
-        if ((changing_limits == 1)) {   // 2maximum
+        if ((changing_limits == 1)) {   /*!< For maximum */
             log_message("\r\nChanging maximum...\n\r");
-            if (is_number(c_received) && (i < 4)){  //proceding with receiving
+            if (is_number(c_received) && (i < 4)){  /*!< Proceding with receiving */
                 rxmsg[i] = c_received;
                 number_received = (number_received*10) + (c_received-48);
 
@@ -252,7 +258,7 @@ void usart1_isr(void) {
                 log_enter();
                 i++;
             }
-            else if ((c_received == '\r') && (i < 4)) { //successfull change
+            else if ((c_received == '\r') && (i < 4)) { /*!< Successfull change */
                 log_message("\r\nNumber Entered\r\n");
                 max = number_received;
                 log_message("\r\nMaximum Umbral Changed to: ");
@@ -265,7 +271,7 @@ void usart1_isr(void) {
                 adc_power_on(ADC1);
                 timer_enable_counter(TIM2);
             }
-            else { //Incorrect char OR exceded lenght
+            else { /*!< Incorrect char OR exceded lenght */
                 log_message("\r\nError\r\n");
 
                 i = 0;
@@ -277,3 +283,4 @@ void usart1_isr(void) {
         }
     }
 }
+/********************************************************************/
