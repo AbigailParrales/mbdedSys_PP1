@@ -30,6 +30,7 @@
 #include "unsere_uart.h"
 #include "unsere_adc.h"
 #include "../2da_capa/led.h"
+#include "../2da_capa/unsere_log.h"
 
 /********************************************************************/
 
@@ -78,20 +79,27 @@ void tim2_isr(void) {
     /** Comparing the value received from the adc with the maximum
     * to turn on the LED on pin A5.
     */
-    if (adc_read > max) {
+    if (adc_read > obtain_max()) {
         LED_ON_PTA5();
         LED_OFF_PTA7();
 
     /** Comparing the value received from the adc with the minimum
     * to turn on the LED on pin A7.
     */
-    } else if (adc_read < min) {
+    }
+    if (adc_read < obtain_min()) {
         LED_OFF_PTA5();
         LED_ON_PTA7();
     }
+    if ((adc_read > obtain_min()) && (adc_read < obtain_max())) {
+        LED_OFF_PTA5();
+        LED_OFF_PTA7();
+    }
 
     //Login temperature
-
+    log_temperature(adc_read, obtain_max(), obtain_min());
+    log_3digs_number(obtain_min());
+    /*
     uart_send("\r\nTemp: ");
     log_number(adc_read);
     
@@ -102,4 +110,5 @@ void tim2_isr(void) {
     log_number(min);
 
     uart_send("\r\n");
+    */
 }
