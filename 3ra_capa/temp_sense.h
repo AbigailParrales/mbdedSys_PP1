@@ -18,7 +18,7 @@
 *                                                                       *
 ************************************************************************/
 
-/*!< LIBRARIES */
+/*!< Conditions to confirm if macro-identifier is defined */
 #ifndef TEMP_SENSE_H
 #define TEMP_SENSE_H
 
