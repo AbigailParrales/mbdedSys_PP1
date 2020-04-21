@@ -37,7 +37,7 @@ void log_enter(void) {
     log_message("\r\n");
 }
 
-void log_temperature(int temp, int max_umbral, int min_unbral) {
+void log_temperature(int temp, int max_umbral, int min_unbral, char* LED_low, char* LED_high) {
     log_message("\r\nTemp: ");
     log_3digs_number(temp);
     
@@ -46,6 +46,12 @@ void log_temperature(int temp, int max_umbral, int min_unbral) {
 
     log_message("    Min: ");
     log_3digs_number(min_unbral);
+
+    log_message("    LED-Low: ");
+    log_message(LED_low);
+
+    log_message("    LED-High: ");
+    log_message(LED_high);
 
     log_message("\r\n");
 }

@@ -74,14 +74,21 @@ void tim2_isr(void) {
     timer_clear_flag(TIM2, TIM_SR_UIF);  ///< Turn off flag
 
     uint16_t adc_read;
+    char* umbral_bajo;
+    char* umbral_alto;
+
+    
     adc_read = (read_adc(1) * 330 / 4095);
 
     /** Comparing the value received from the adc with the maximum
     * to turn on the LED on pin A5.
     */
-    if (adc_read > obtain_max()) {
+    if (adc_read > obtain_max()) {  //umbral alto
         LED_ON_PTA5();
         LED_OFF_PTA7();
+
+        umbral_alto = "ON ";
+        umbral_bajo = "OFF";
 
     /** Comparing the value received from the adc with the minimum
     * to turn on the LED on pin A7.
@@ -90,14 +97,19 @@ void tim2_isr(void) {
     if (adc_read < obtain_min()) {
         LED_OFF_PTA5();
         LED_ON_PTA7();
+
+        umbral_alto = "OFF";
+        umbral_bajo = "ON ";
     }
     if ((adc_read > obtain_min()) && (adc_read < obtain_max())) {
         LED_OFF_PTA5();
         LED_OFF_PTA7();
+
+        umbral_alto = "OFF";
+        umbral_bajo = "OFF";
     }
 
     //Login temperature
-    log_temperature(adc_read, obtain_max(), obtain_min());
-    log_3digs_number(obtain_min());
+    log_temperature(adc_read, obtain_max(), obtain_min(), umbral_bajo, umbral_alto);
 
 }
