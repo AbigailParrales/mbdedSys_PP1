@@ -19,7 +19,6 @@
 ************************************************************************/
 
 /*!< LIBRARIES */
-/*!< #include <libopencm3/stm32/rcc.h> */
 #include <libopencm3/stm32/gpio.h>
 
 #include "unsere_gpio.h"
