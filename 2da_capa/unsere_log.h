@@ -18,7 +18,7 @@
 *                                                                       *
 ************************************************************************/
 
-/*!< LIBRARIES */
+/*!< Conditions to confirm if macro-identifier is defined */
 #ifndef UNSERE_LOG_H
 #define UNSERE_LOG_H
 
